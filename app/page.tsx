@@ -114,7 +114,7 @@ export default function Home() {
               Gemini AI Categorizes
             </h3>
             <p className="text-sm text-slate-600 leading-relaxed">
-              Gemini reads the report and photo, evaluates safety priority (Low to Critical),
+              Gemini analyzes the grievance report, evaluates safety priority (Low to Critical),
               and routes it to the exact city department.
             </p>
           </div>

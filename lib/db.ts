@@ -1,16 +1,57 @@
 import fs from "fs/promises";
 import path from "path";
+import os from "os";
 import { Complaint, ComplaintStatus } from "./types";
+import { SAMPLE_COMPLAINTS } from "./sample-data";
 
-const DB_PATH = path.join(process.cwd(), "data", "complaints.json");
+// In production (Cloud Run, Docker containers, etc.), store data and uploads in os.tmpdir()
+const isProduction = process.env.NODE_ENV === "production" || !!process.env.K_SERVICE;
 
-// Ensure the data directory and complaints.json exist
+export const DATA_DIR = isProduction
+  ? path.join(os.tmpdir(), "civicresolve-data")
+  : path.join(process.cwd(), "data");
+
+export const UPLOADS_DIR = isProduction
+  ? path.join(os.tmpdir(), "civicresolve-uploads")
+  : path.join(process.cwd(), "public", "uploads");
+
+export const DB_PATH = path.join(DATA_DIR, "complaints.json");
+
+// Ensure data directory, uploads directory, and complaints.json exist
 async function ensureDbExists(): Promise<void> {
   try {
-    await fs.access(DB_PATH);
-  } catch {
-    await fs.mkdir(path.dirname(DB_PATH), { recursive: true });
-    await fs.writeFile(DB_PATH, JSON.stringify([], null, 2), "utf8");
+    await fs.mkdir(DATA_DIR, { recursive: true });
+    await fs.mkdir(UPLOADS_DIR, { recursive: true });
+
+    // Check if complaints.json already exists and has content
+    try {
+      const stats = await fs.stat(DB_PATH);
+      if (stats.size > 2) {
+        return;
+      }
+    } catch {
+      // File does not exist, proceed to create
+    }
+
+    // If running in production / os.tmpdir(), try to copy existing complaints from process.cwd()/data/complaints.json
+    const localDbPath = path.join(process.cwd(), "data", "complaints.json");
+    if (localDbPath !== DB_PATH) {
+      try {
+        const localData = await fs.readFile(localDbPath, "utf8");
+        const parsed = JSON.parse(localData);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          await fs.writeFile(DB_PATH, JSON.stringify(parsed, null, 2), "utf8");
+          return;
+        }
+      } catch {
+        // Fall back to sample complaints
+      }
+    }
+
+    // Create the data file from the 8 sample complaints if missing
+    await fs.writeFile(DB_PATH, JSON.stringify(SAMPLE_COMPLAINTS, null, 2), "utf8");
+  } catch (err) {
+    console.error("[CivicResolve Storage] Error initializing storage:", err);
   }
 }
 

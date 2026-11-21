@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";
 import fs from "fs/promises";
-import { createComplaint, getComplaints } from "@/lib/db";
+import { createComplaint, getComplaints, UPLOADS_DIR } from "@/lib/db";
 import { Category, Priority } from "@/lib/types";
 
 const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -76,17 +76,16 @@ export async function POST(req: NextRequest) {
         // Generate safe unique filename
         const ext = file.type === "image/png" ? ".png" : file.type === "image/webp" ? ".webp" : ".jpg";
         const filename = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}${ext}`;
-        const uploadsDir = path.join(process.cwd(), "public", "uploads");
-
-        // Ensure directory exists
-        await fs.mkdir(uploadsDir, { recursive: true });
+        // Ensure uploads directory exists (in os.tmpdir() in production, or public/uploads in dev)
+        await fs.mkdir(UPLOADS_DIR, { recursive: true });
 
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
-        const filePath = path.join(uploadsDir, filename);
+        const filePath = path.join(UPLOADS_DIR, filename);
         await fs.writeFile(filePath, buffer);
 
-        imageUrl = `/uploads/${filename}`;
+        // Serve uploaded images through the API route
+        imageUrl = `/api/uploads/${filename}`;
       }
     } else {
       // JSON body
