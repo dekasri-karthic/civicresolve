@@ -1,0 +1,148 @@
+import { NextRequest, NextResponse } from "next/server";
+import { GoogleGenAI } from "@google/genai";
+import { CATEGORIES, Category } from "@/lib/types";
+
+const ALLOWED_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+
+export async function POST(req: NextRequest) {
+  try {
+    const contentType = req.headers.get("content-type") || "";
+
+    let imageBuffer: Buffer | undefined;
+    let imageMimeType: string | undefined;
+
+    if (contentType.includes("multipart/form-data")) {
+      const formData = await req.formData();
+      const file = formData.get("image") as File | null;
+
+      if (!file || file.size === 0) {
+        return NextResponse.json(
+          { error: "No image file provided." },
+          { status: 400 }
+        );
+      }
+
+      if (file.size > MAX_FILE_SIZE) {
+        return NextResponse.json(
+          { error: "Image file exceeds 5 MB limit." },
+          { status: 400 }
+        );
+      }
+
+      if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+        return NextResponse.json(
+          { error: "Only JPG, PNG, and WebP images are supported." },
+          { status: 400 }
+        );
+      }
+
+      const bytes = await file.arrayBuffer();
+      imageBuffer = Buffer.from(bytes);
+      imageMimeType = file.type;
+    } else {
+      const body = await req.json();
+      if (!body.imageBase64 || !body.imageMimeType) {
+        return NextResponse.json(
+          { error: "Image base64 data and mimeType required." },
+          { status: 400 }
+        );
+      }
+      imageBuffer = Buffer.from(body.imageBase64, "base64");
+      imageMimeType = body.imageMimeType;
+    }
+
+    const apiKey = process.env.GEMINI_API_KEY;
+    const modelName = process.env.GEMINI_MODEL || "gemini-3.8-flash";
+
+    if (!apiKey || apiKey.trim() === "" || apiKey === "placeholder" || apiKey.includes("your_")) {
+      console.warn("[CivicResolve Photo-First] GEMINI_API_KEY is not set. Cannot run multimodal analysis.");
+      return NextResponse.json(
+        { error: "Gemini API key is not configured for image vision analysis." },
+        { status: 503 }
+      );
+    }
+
+    const ai = new GoogleGenAI({ apiKey });
+
+    const prompt = `You are an expert municipal infrastructure inspector analyzing an uploaded civic issue photograph.
+Examine the image carefully and detect the visible civic problem (such as a pothole, road crater, garbage overflow, broken streetlight, water pipe burst, open drain, exposed cable, fallen branch, etc.).
+
+Return strict JSON with these exact fields:
+{
+  "title": "<A clear, professional civic grievance title, e.g. 'Deep asphalt pothole causing traffic obstruction' or 'Uncollected garbage pile overflowing on sidewalk'>",
+  "description": "<A detailed 2-3 sentence description of what is clearly visible in the image, noting surface condition, severity, and potential hazards to pedestrians or motorists>",
+  "category": "<One of: 'Road & Potholes', 'Garbage & Sanitation', 'Street Lighting', 'Water Supply & Leakage', 'Drainage & Sewage', 'Public Safety', 'Other'>"
+}
+
+Make the title and description realistic and ready for municipal review.`;
+
+    // Generate content with retry for resilience
+    let response;
+    try {
+      response = await ai.models.generateContent({
+        model: modelName,
+        contents: [
+          {
+            inlineData: {
+              mimeType: imageMimeType,
+              data: imageBuffer.toString("base64"),
+            },
+          },
+          prompt,
+        ],
+        config: {
+          responseMimeType: "application/json",
+        },
+      });
+    } catch (firstErr: any) {
+      console.warn("[CivicResolve Image Analysis] First attempt failed, retrying once...", firstErr?.message);
+      // Wait 1.5s and retry once
+      await new Promise((r) => setTimeout(r, 1500));
+      response = await ai.models.generateContent({
+        model: modelName,
+        contents: [
+          {
+            inlineData: {
+              mimeType: imageMimeType,
+              data: imageBuffer.toString("base64"),
+            },
+          },
+          prompt,
+        ],
+        config: {
+          responseMimeType: "application/json",
+        },
+      });
+    }
+
+    const textOutput = response.text?.trim() || "";
+    if (!textOutput) {
+      throw new Error("Gemini returned empty analysis for the image.");
+    }
+
+    const parsed = JSON.parse(textOutput);
+
+    // Validate category
+    let category: Category = "Other";
+    if (CATEGORIES.includes(parsed.category)) {
+      category = parsed.category;
+    }
+
+    return NextResponse.json({
+      success: true,
+      title: parsed.title || "Civic issue detected in photograph",
+      description: parsed.description || "Issue identified from uploaded photograph.",
+      category,
+    });
+  } catch (error: any) {
+    console.error("❌ [CivicResolve /api/analyze-image Error]:", error?.message || error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: error?.message || "Failed to analyze photo with Gemini AI.",
+      },
+      { status: 500 }
+    );
+  }
+}

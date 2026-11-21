@@ -7,8 +7,10 @@ import {
   ArrowRight,
   Bot,
   Building2,
+  Camera,
   CheckCircle2,
   Image as ImageIcon,
+  Info,
   Loader2,
   MapPin,
   RefreshCw,
@@ -29,6 +31,11 @@ export default function ReportPage() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
+  // Photo-first AI analysis states
+  const [analyzingPhoto, setAnalyzingPhoto] = useState(false);
+  const [photoAiNote, setPhotoAiNote] = useState<string | null>(null);
+  const [photoAiError, setPhotoAiError] = useState<string | null>(null);
+
   // Flow states: "form" | "analyzing" | "review" | "submitting" | "success"
   const [step, setStep] = useState<"form" | "analyzing" | "review" | "submitting" | "success">(
     "form"
@@ -46,9 +53,12 @@ export default function ReportPage() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Handle image selection
-  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+  // Handle image selection & trigger photo-first AI detection
+  const handleImageChange = async (e: ChangeEvent<HTMLInputElement>) => {
     setErrorMessage("");
+    setPhotoAiError(null);
+    setPhotoAiNote(null);
+
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -63,22 +73,63 @@ export default function ReportPage() {
     }
 
     setImageFile(file);
+
+    // Create preview
     const reader = new FileReader();
     reader.onload = (event) => {
       setImagePreview(event.target?.result as string);
     };
     reader.readAsDataURL(file);
+
+    // Call POST /api/analyze-image for photo-first auto-completion
+    setAnalyzingPhoto(true);
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+
+      const res = await fetch("/api/analyze-image", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        if (data.title) setTitle(data.title);
+        if (data.description) setDescription(data.description);
+        if (data.category && CATEGORIES.includes(data.category)) {
+          setSelectedCategory(data.category);
+        }
+        setPhotoAiNote(
+          "✨ AI analyzed your photo and auto-filled the title, description, and category. You can edit any field below."
+        );
+      } else {
+        // Gentle fallback message without breaking or crashing
+        setPhotoAiError(
+          "Could not automatically detect issue details from this photo. Please describe it manually below."
+        );
+      }
+    } catch (err: any) {
+      console.warn("Photo analysis error (continuing without auto-fill):", err);
+      setPhotoAiError(
+        "Could not automatically detect issue details from this photo. Please describe it manually below."
+      );
+    } finally {
+      setAnalyzingPhoto(false);
+    }
   };
 
   const removeImage = () => {
     setImageFile(null);
     setImagePreview(null);
+    setPhotoAiNote(null);
+    setPhotoAiError(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   };
 
-  // Step 1: Citizen submits form to trigger AI classification
+  // Step 1: Citizen submits form to trigger AI classification & priority triage
   const handleAnalyze = async (e: FormEvent) => {
     e.preventDefault();
     setErrorMessage("");
@@ -122,7 +173,6 @@ export default function ReportPage() {
       const data: ClassificationResult = await res.json();
       setAiResult(data);
 
-      // If citizen didn't explicitly override category in initial form, use AI recommendation
       const initialCat =
         selectedCategory !== "auto" && CATEGORIES.includes(selectedCategory as Category)
           ? (selectedCategory as Category)
@@ -198,15 +248,14 @@ export default function ReportPage() {
       {/* Page Title */}
       <div className="mb-8 text-center sm:text-left">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-50 border border-teal-200 text-teal-800 text-xs font-semibold mb-2">
-          <Sparkles className="w-3.5 h-3.5 text-teal-600" />
-          <span>Automated AI Triage</span>
+          <Camera className="w-3.5 h-3.5 text-teal-600" />
+          <span>Photo-First AI Reporting</span>
         </div>
         <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
           Report a Civic Grievance
         </h1>
         <p className="text-slate-600 mt-1 text-sm sm:text-base">
-          Submit local issues like potholes, trash heaps, or broken streetlights.
-          Gemini will classify and route it to city authorities.
+          Upload a photo to let Gemini auto-fill the issue details, or type them in manually.
         </p>
       </div>
 
@@ -233,14 +282,111 @@ export default function ReportPage() {
           onSubmit={handleAnalyze}
           className="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 sm:p-8 space-y-6"
         >
+          {/* PHOTO-FIRST UPLOAD SECTION */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-b from-teal-50/50 to-slate-50 border border-teal-100/80">
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-bold text-slate-900 flex items-center gap-2">
+                <Camera className="w-4 h-4 text-teal-600" />
+                <span>Snap or Upload Issue Photo (Photo-First)</span>
+              </label>
+              <span className="text-[11px] font-semibold text-teal-700 bg-teal-100/70 px-2.5 py-0.5 rounded-full">
+                AI Vision
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 mb-3">
+              Upload a clear photo (JPG, PNG, or WebP). Gemini Vision will automatically detect the civic problem and fill in the form for you!
+            </p>
+
+            {!imagePreview ? (
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className="border-2 border-dashed border-teal-300 hover:border-teal-500 rounded-xl p-6 text-center cursor-pointer transition-colors bg-white hover:bg-teal-50/30 group"
+              >
+                <UploadCloud className="w-8 h-8 text-teal-500 group-hover:scale-110 mx-auto mb-2 transition-transform" />
+                <p className="text-sm font-semibold text-slate-800">
+                  Click to select photo, or drag and drop
+                </p>
+                <p className="text-xs text-slate-400 mt-1">
+                  JPG, PNG, or WEBP up to 5 MB
+                </p>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={handleImageChange}
+                  className="hidden"
+                />
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="relative rounded-xl overflow-hidden border border-slate-200 bg-slate-900 max-w-sm">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={imagePreview}
+                    alt="Issue preview"
+                    className="w-full h-44 object-cover opacity-90"
+                  />
+                  <button
+                    type="button"
+                    onClick={removeImage}
+                    className="absolute top-2 right-2 p-1.5 bg-black/75 hover:bg-black text-white rounded-full transition-colors shadow-md cursor-pointer"
+                    title="Remove photo"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                  <div className="p-2.5 bg-white text-xs text-slate-600 flex items-center justify-between">
+                    <span className="truncate">{imageFile?.name}</span>
+                    <span className="shrink-0 text-slate-400">
+                      {imageFile ? `${(imageFile.size / 1024 / 1024).toFixed(2)} MB` : ""}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Photo-First Analyzing Loading State */}
+                {analyzingPhoto && (
+                  <div className="p-3.5 rounded-xl bg-teal-50 border border-teal-200 flex items-center gap-2.5 text-xs text-teal-800 animate-pulse">
+                    <Loader2 className="w-4 h-4 animate-spin text-teal-600 shrink-0" />
+                    <span>Gemini is inspecting your photo to identify the civic issue...</span>
+                  </div>
+                )}
+
+                {/* Photo-First AI Success Note */}
+                {!analyzingPhoto && photoAiNote && (
+                  <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800 flex items-start gap-2.5">
+                    <Sparkles className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <strong className="font-semibold">AI filled this from your photo: </strong>
+                      <span>Review the title, description, and category below. You can edit any detail.</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Photo-First Gentle Failure Notice */}
+                {!analyzingPhoto && photoAiError && (
+                  <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800 flex items-center gap-2">
+                    <Info className="w-4 h-4 text-amber-600 shrink-0" />
+                    <span>{photoAiError}</span>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
           {/* Title */}
           <div>
-            <label
-              htmlFor="title"
-              className="block text-sm font-semibold text-slate-800 mb-1.5"
-            >
-              Issue Title <span className="text-red-500">*</span>
-            </label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label
+                htmlFor="title"
+                className="block text-sm font-semibold text-slate-800"
+              >
+                Issue Title <span className="text-red-500">*</span>
+              </label>
+              {photoAiNote && (
+                <span className="text-[11px] font-medium text-teal-700 bg-teal-50 px-2 py-0.5 rounded-md">
+                  Auto-suggested
+                </span>
+              )}
+            </div>
             <input
               id="title"
               type="text"
@@ -254,12 +400,19 @@ export default function ReportPage() {
 
           {/* Description */}
           <div>
-            <label
-              htmlFor="description"
-              className="block text-sm font-semibold text-slate-800 mb-1.5"
-            >
-              Description <span className="text-red-500">*</span>
-            </label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label
+                htmlFor="description"
+                className="block text-sm font-semibold text-slate-800"
+              >
+                Description <span className="text-red-500">*</span>
+              </label>
+              {photoAiNote && (
+                <span className="text-[11px] font-medium text-teal-700 bg-teal-50 px-2 py-0.5 rounded-md">
+                  Auto-suggested
+                </span>
+              )}
+            </div>
             <textarea
               id="description"
               rows={4}
@@ -305,7 +458,7 @@ export default function ReportPage() {
               id="category"
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 outline-hidden text-slate-800 text-sm bg-white transition-all"
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 outline-hidden text-slate-800 text-sm bg-white transition-all font-medium"
             >
               <option value="auto">✨ Let AI decide (Recommended)</option>
               {CATEGORIES.map((cat) => (
@@ -315,71 +468,19 @@ export default function ReportPage() {
               ))}
             </select>
             <p className="text-xs text-slate-500 mt-1">
-              Leave on &ldquo;Let AI decide&rdquo; for Gemini to detect the category automatically.
+              Leave on &ldquo;Let AI decide&rdquo; for Gemini to verify category during submission.
             </p>
-          </div>
-
-          {/* Image Upload with Preview */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-800 mb-1.5">
-              Photo of Issue (Optional)
-            </label>
-            <p className="text-xs text-slate-500 mb-2.5">
-              Upload a clear photo (JPG, PNG, or WebP up to 5 MB). Gemini uses image analysis to verify severity.
-            </p>
-
-            {!imagePreview ? (
-              <div
-                onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-slate-300 hover:border-teal-500 rounded-2xl p-6 text-center cursor-pointer transition-colors bg-slate-50/60 hover:bg-teal-50/20 group"
-              >
-                <UploadCloud className="w-9 h-9 text-slate-400 group-hover:text-teal-600 mx-auto mb-2 transition-colors" />
-                <p className="text-sm font-medium text-slate-700">
-                  Click to select a photo, or drag and drop
-                </p>
-                <p className="text-xs text-slate-400 mt-1">PNG, JPG, or WEBP up to 5 MB</p>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  onChange={handleImageChange}
-                  className="hidden"
-                />
-              </div>
-            ) : (
-              <div className="relative rounded-2xl overflow-hidden border border-slate-200 bg-slate-900 max-w-sm">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={imagePreview}
-                  alt="Issue preview"
-                  className="w-full h-48 object-cover opacity-90"
-                />
-                <button
-                  type="button"
-                  onClick={removeImage}
-                  className="absolute top-2 right-2 p-1.5 bg-black/70 hover:bg-black text-white rounded-full transition-colors shadow-md"
-                  title="Remove photo"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-                <div className="p-2.5 bg-white text-xs text-slate-600 flex items-center justify-between">
-                  <span className="truncate">{imageFile?.name}</span>
-                  <span className="shrink-0 text-slate-400">
-                    {imageFile ? `${(imageFile.size / 1024 / 1024).toFixed(2)} MB` : ""}
-                  </span>
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Form Actions */}
           <div className="pt-4 border-t border-slate-100 flex items-center justify-end">
             <button
               type="submit"
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white font-semibold text-sm shadow-md shadow-teal-600/20 transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
+              disabled={analyzingPhoto}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white font-semibold text-sm shadow-md shadow-teal-600/20 transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer disabled:opacity-50"
             >
               <Sparkles className="w-4 h-4" />
-              <span>Analyze & Review with AI</span>
+              <span>Review with AI</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
@@ -398,7 +499,7 @@ export default function ReportPage() {
               AI is analyzing your report...
             </h3>
             <p className="text-slate-600 text-sm mt-1.5 max-w-md mx-auto">
-              Google Gemini is reading your issue description, evaluating public safety risk,
+              Google Gemini is reading your grievance details, evaluating public safety risk,
               and matching with the relevant municipal division.
             </p>
           </div>
@@ -426,7 +527,6 @@ export default function ReportPage() {
                 </h3>
               </div>
 
-              {/* Requirement 2: Show source label */}
               {aiResult.source === "gemini" ? (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-50 border border-teal-200 text-teal-800 text-xs font-semibold">
                   <Sparkles className="w-3.5 h-3.5 text-teal-600" />

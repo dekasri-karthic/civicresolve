@@ -1,5 +1,21 @@
 [
   {
+    "title": "Severe asphalt pothole with standing water and surface cracking",
+    "description": "A deep and wide pothole has developed in the asphalt pavement, filled with collected rainwater and surrounded by significant structural cracking and loose debris. The deteriorating road surface poses an immediate tripping hazard for pedestrians and risks tire or suspension damage to vehicular traffic. Asphalt patching and road resurfacing are required to prevent further erosion of the road sub-base.",
+    "location": "100 Feet Road, Indiranagar, Bengaluru",
+    "category": "Road & Potholes",
+    "priority": "Critical",
+    "department": "Public Works & Road Maintenance Division",
+    "status": "Reported",
+    "imageUrl": "/uploads/1795250735384-59zvwn.jpg",
+    "aiSummary": "Road & Potholes issue reported at 100 Feet Road, Indiranagar, Bengaluru: Severe asphalt pothole with standing water and surface cracking",
+    "aiReasoning": "Keyword-based triage identified keywords related to Road & Potholes. Assigned Critical priority based on safety and situational risk indicators.",
+    "aiSource": "fallback",
+    "id": "CR-49337",
+    "createdAt": "2026-11-21T08:45:35.394Z",
+    "updatedAt": "2026-11-21T08:45:35.394Z"
+  },
+  {
     "title": "Streetlights not working near school",
     "description": "Three streetlights on the road in front of the primary school have been off for over a week. The road is completely dark after 6 PM and children returning from evening tuition classes have to walk in the dark. There was also an accident last night when a scooter hit a stray dog.",
     "location": "Gandhi Nagar Main Road, near Government Primary School",
