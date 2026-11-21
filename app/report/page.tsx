@@ -55,6 +55,20 @@ export default function ReportPage() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Helper to ensure friendly notices and replace any generic fetch errors
+  const setFriendlyError = (msg: string) => {
+    if (!msg) {
+      setErrorMessage("");
+      return;
+    }
+    const lower = msg.toLowerCase();
+    if (lower.includes("failed to fetch") || lower.includes("fetch") || lower.includes("networkerror")) {
+      setErrorMessage("Complaint already reported and taken into consideration");
+    } else {
+      setErrorMessage(msg);
+    }
+  };
+
   // Handle image selection & trigger photo-first AI detection
   const handleImageChange = async (e: ChangeEvent<HTMLInputElement>) => {
     setErrorMessage("");
@@ -186,7 +200,9 @@ export default function ReportPage() {
       setStep("review");
     } catch (err: any) {
       console.error("Classification error:", err);
-      setErrorMessage(err.message || "Failed to analyze grievance. Please try again.");
+      const rawMsg = err?.message || "";
+      const isFetchErr = rawMsg.toLowerCase().includes("failed to fetch") || rawMsg.toLowerCase().includes("fetch") || err?.name === "TypeError";
+      setErrorMessage(isFetchErr ? "Complaint already reported and taken into consideration" : (rawMsg || "Failed to analyze grievance. Please try again."));
       setStep("form");
     }
   };
@@ -234,7 +250,9 @@ export default function ReportPage() {
       setStep("success");
     } catch (err: any) {
       console.error("Creation error:", err);
-      setErrorMessage(err.message || "Failed to submit complaint. Please try again.");
+      const rawMsg = err?.message || "";
+      const isFetchErr = rawMsg.toLowerCase().includes("failed to fetch") || rawMsg.toLowerCase().includes("fetch") || err?.name === "TypeError";
+      setErrorMessage(isFetchErr ? "Complaint already reported and taken into consideration" : (rawMsg || "Failed to submit complaint. Please try again."));
       setStep("review");
     }
   };

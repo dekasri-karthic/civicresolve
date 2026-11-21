@@ -77,47 +77,80 @@ Return strict JSON with these exact fields:
   "description": "<A detailed 2-3 sentence description in English of what is clearly visible in the image, noting surface condition, severity, and potential hazards to pedestrians or motorists>",
   "category": "<One of: 'Road & Potholes', 'Garbage & Sanitation', 'Street Lighting', 'Water Supply & Leakage', 'Drainage & Sewage', 'Public Safety', 'Other'>"
 }
-}
 
 Make the title and description realistic and ready for municipal review.`;
 
-    // Generate content with retry for resilience
-    let response;
+    // Safe timeout helper (8 seconds)
+    const withTimeout = <T>(promise: Promise<T>, ms = 8000): Promise<T> => {
+      let timeoutId: NodeJS.Timeout;
+      const timeoutPromise = new Promise<T>((_, reject) => {
+        timeoutId = setTimeout(() => reject(new Error(`Vision request timed out after ${ms}ms`)), ms);
+      });
+      return Promise.race([promise, timeoutPromise]).finally(() => clearTimeout(timeoutId));
+    };
+
+    // Generate content with multi-model fallback for resilience
+    let response: any;
     try {
-      response = await ai.models.generateContent({
-        model: modelName,
-        contents: [
-          {
-            inlineData: {
-              mimeType: imageMimeType,
-              data: imageBuffer.toString("base64"),
+      response = await withTimeout(
+        ai.models.generateContent({
+          model: modelName,
+          contents: [
+            {
+              inlineData: {
+                mimeType: imageMimeType,
+                data: imageBuffer.toString("base64"),
+              },
             },
+            prompt,
+          ],
+          config: {
+            responseMimeType: "application/json",
           },
-          prompt,
-        ],
-        config: {
-          responseMimeType: "application/json",
-        },
-      });
-    } catch (firstErr: any) {
-      console.warn("[CivicResolve Image Analysis] First attempt failed, retrying once...", firstErr?.message);
-      // Wait 1.5s and retry once
-      await new Promise((r) => setTimeout(r, 1500));
-      response = await ai.models.generateContent({
-        model: modelName,
-        contents: [
-          {
-            inlineData: {
-              mimeType: imageMimeType,
-              data: imageBuffer.toString("base64"),
-            },
-          },
-          prompt,
-        ],
-        config: {
-          responseMimeType: "application/json",
-        },
-      });
+        }),
+        8000
+      );
+    } catch (primaryErr: any) {
+      console.warn(
+        `[CivicResolve Image Analysis] Primary model (${modelName}) failed or reached limit, trying resilient alternatives...`,
+        primaryErr?.message || primaryErr
+      );
+      const fallbackModels = ["gemini-2.5-flash", "gemini-2.0-flash"].filter(
+        (m) => m !== modelName
+      );
+      let success = false;
+      for (const altModel of fallbackModels) {
+        try {
+          response = await withTimeout(
+            ai.models.generateContent({
+              model: altModel,
+              contents: [
+                {
+                  inlineData: {
+                    mimeType: imageMimeType,
+                    data: imageBuffer.toString("base64"),
+                  },
+                },
+                prompt,
+              ],
+              config: {
+                responseMimeType: "application/json",
+              },
+            }),
+            6000
+          );
+          success = true;
+          break;
+        } catch (altErr: any) {
+          console.warn(
+            `[CivicResolve Image Analysis] Alt model ${altModel} failed:`,
+            altErr?.message || altErr
+          );
+        }
+      }
+      if (!success) {
+        throw primaryErr;
+      }
     }
 
     const textOutput = response.text?.trim() || "";

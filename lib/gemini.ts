@@ -266,31 +266,58 @@ Your response MUST be strict JSON with these exact keys:
     }
     contents.push(promptText);
 
-    let response;
-    try {
-      response = await ai.models.generateContent({
-        model: modelName,
-        contents,
-        config: {
-          responseMimeType: "application/json",
-        },
+    // Safe timeout wrapper (7s max)
+    const withTimeout = <T>(promise: Promise<T>, ms = 7000): Promise<T> => {
+      let timeoutId: NodeJS.Timeout;
+      const timeoutPromise = new Promise<T>((_, reject) => {
+        timeoutId = setTimeout(() => reject(new Error(`Gemini request timed out after ${ms}ms`)), ms);
       });
-    } catch (primaryErr: any) {
-      console.warn(
-        `[CivicResolve Classification] Primary model (${modelName}) encountered an issue, retrying with resilient model...`,
-        primaryErr?.message || primaryErr
-      );
-      await new Promise((r) => setTimeout(r, 1200));
-      const altModel = modelName === "gemini-2.5-flash" ? "gemini-2.0-flash" : "gemini-2.5-flash";
-      try {
-        response = await ai.models.generateContent({
-          model: altModel,
+      return Promise.race([promise, timeoutPromise]).finally(() => clearTimeout(timeoutId));
+    };
+
+    let response: any;
+    try {
+      response = await withTimeout(
+        ai.models.generateContent({
+          model: modelName,
           contents,
           config: {
             responseMimeType: "application/json",
           },
-        });
-      } catch {
+        }),
+        7000
+      );
+    } catch (primaryErr: any) {
+      console.warn(
+        `[CivicResolve Classification] Primary model (${modelName}) failed or reached daily limit, trying resilient alternatives...`,
+        primaryErr?.message || primaryErr
+      );
+      const fallbackModels = ["gemini-2.5-flash", "gemini-2.0-flash"].filter(
+        (m) => m !== modelName
+      );
+      let success = false;
+      for (const altModel of fallbackModels) {
+        try {
+          response = await withTimeout(
+            ai.models.generateContent({
+              model: altModel,
+              contents,
+              config: {
+                responseMimeType: "application/json",
+              },
+            }),
+            5000
+          );
+          success = true;
+          break;
+        } catch (altErr: any) {
+          console.warn(
+            `[CivicResolve Classification] Alt model ${altModel} failed:`,
+            altErr?.message || altErr
+          );
+        }
+      }
+      if (!success) {
         throw primaryErr;
       }
     }

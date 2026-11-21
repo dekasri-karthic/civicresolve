@@ -34,10 +34,12 @@ export default function Home() {
             </span>
           </h1>
 
-          {/* Tagline */}
-          <p className="mt-4 text-xl sm:text-2xl font-semibold text-teal-700 tracking-wide uppercase">
-            Report. Track. Resolve.
-          </p>
+          {/* Tagline Badge */}
+          <div className="mt-5 flex items-center justify-center">
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-teal-50 border border-teal-200 text-teal-800 text-xs sm:text-sm font-bold tracking-widest uppercase shadow-xs">
+              Report • Track • Resolve
+            </span>
+          </div>
 
           <p className="mt-4 max-w-2xl mx-auto text-base sm:text-lg text-slate-600 leading-relaxed">
             Report potholes, garbage overflows, broken streetlights, or water
