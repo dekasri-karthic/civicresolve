@@ -21,13 +21,13 @@
     "category": "Road & Potholes",
     "priority": "High",
     "department": "Public Works Department (PWD)",
-    "status": "Reported",
+    "status": "Resolved",
     "aiSummary": "Large 2-foot pothole on Main Hospital Road causing vehicle damage and two-wheeler skidding.",
     "aiReasoning": "Classified under Road & Potholes as it involves road surface deterioration. High priority is warranted because it poses a significant traffic safety risk directly in front of a major hospital entrance.",
     "aiSource": "gemini",
     "id": "CR-87468",
     "createdAt": "2026-11-21T08:19:22.137Z",
-    "updatedAt": "2026-11-21T08:19:22.137Z"
+    "updatedAt": "2026-11-21T08:34:24.012Z"
   },
   {
     "id": "CR-45129",
