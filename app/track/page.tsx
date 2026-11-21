@@ -8,6 +8,7 @@ import {
   Calendar,
   ChevronDown,
   ChevronUp,
+  Clock,
   ExternalLink,
   Filter,
   Image as ImageIcon,
@@ -17,6 +18,7 @@ import {
   Search,
   Sparkles,
   Tag,
+  Wrench,
   X,
 } from "lucide-react";
 import { Category, CATEGORIES, Complaint, ComplaintStatus } from "@/lib/types";
@@ -349,6 +351,26 @@ export default function TrackPage() {
                         <span>{item.department}</span>
                       </span>
                     </div>
+
+                    {/* Department Action & Resolution Target */}
+                    {(item.suggestedAction || item.estimatedResolution) && (
+                      <div className="mt-3 p-3 rounded-xl bg-slate-50/80 border border-slate-200/80 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        {item.suggestedAction && (
+                          <div className="flex items-start gap-1.5 text-slate-700">
+                            <Wrench className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
+                            <span>
+                              <strong className="text-slate-800">Action:</strong> {item.suggestedAction}
+                            </span>
+                          </div>
+                        )}
+                        {item.estimatedResolution && (
+                          <div className="flex items-center gap-1.5 text-slate-600 shrink-0 bg-white px-2.5 py-1 rounded-md border border-slate-200">
+                            <Clock className="w-3.5 h-3.5 text-teal-600 shrink-0" />
+                            <span>Target: <strong className="text-slate-800">{item.estimatedResolution}</strong></span>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -393,6 +415,18 @@ export default function TrackPage() {
                       AI Reasoning:{" "}
                       <span className="font-normal text-slate-700">{item.aiReasoning}</span>
                     </p>
+                    {item.suggestedAction && (
+                      <p className="font-semibold text-teal-900">
+                        Action Plan:{" "}
+                        <span className="font-normal text-slate-700">{item.suggestedAction}</span>
+                      </p>
+                    )}
+                    {item.estimatedResolution && (
+                      <p className="font-semibold text-teal-900">
+                        SLA Window:{" "}
+                        <span className="font-normal text-slate-700">{item.estimatedResolution}</span>
+                      </p>
+                    )}
                   </div>
                 )}
               </div>

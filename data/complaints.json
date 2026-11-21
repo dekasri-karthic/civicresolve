@@ -1,5 +1,22 @@
 [
   {
+    "title": "ரோட்டில் பெரிய பள்ளம் ஏற்பட்டுள்ளது",
+    "description": "அண்ணா நகர் மெயின் ரோட்டில் ஆழமான குழி ஏற்பட்டுள்ளது. இருசக்கர வாகனங்கள் விழுந்து விபத்து ஏற்படும் அபாயம் உள்ளது. மழை நீர் தேங்கி ஆபத்தாக உள்ளது.",
+    "location": "Anna Nagar 2nd Avenue, Chennai",
+    "category": "Road & Potholes",
+    "priority": "Critical",
+    "department": "Public Works & Road Maintenance Division",
+    "status": "Reported",
+    "aiSummary": "Road & Potholes issue reported at Anna Nagar 2nd Avenue, Chennai: ரோட்டில் பெரிய பள்ளம் ஏற்பட்டுள்ளது",
+    "aiReasoning": "Keyword-based triage identified keywords related to Road & Potholes. Assigned Critical priority based on safety and situational risk indicators.",
+    "suggestedAction": "Deploy road repair crew with cold/hot bituminous asphalt mix to level and patch damaged surface.",
+    "estimatedResolution": "12-24 hours",
+    "aiSource": "fallback",
+    "id": "CR-57422",
+    "createdAt": "2026-11-21T09:18:42.813Z",
+    "updatedAt": "2026-11-21T09:18:42.813Z"
+  },
+  {
     "title": "Severe asphalt pothole with standing water and surface cracking",
     "description": "A deep and wide pothole has developed in the asphalt pavement, filled with collected rainwater and surrounded by significant structural cracking and loose debris. The deteriorating road surface poses an immediate tripping hazard for pedestrians and risks tire or suspension damage to vehicular traffic. Asphalt patching and road resurfacing are required to prevent further erosion of the road sub-base.",
     "location": "100 Feet Road, Indiranagar, Bengaluru",
@@ -13,7 +30,9 @@
     "aiSource": "fallback",
     "id": "CR-49337",
     "createdAt": "2026-11-21T08:45:35.394Z",
-    "updatedAt": "2026-11-21T08:51:32.336Z"
+    "updatedAt": "2026-11-21T08:51:32.336Z",
+    "suggestedAction": "Deploy road repair crew with cold/hot bituminous asphalt mix to level and patch damaged surface.",
+    "estimatedResolution": "12-24 hours"
   },
   {
     "title": "Streetlights not working near school",
@@ -28,7 +47,9 @@
     "aiSource": "gemini",
     "id": "CR-20028",
     "createdAt": "2026-11-21T08:25:14.819Z",
-    "updatedAt": "2026-11-21T08:25:14.819Z"
+    "updatedAt": "2026-11-21T08:25:14.819Z",
+    "suggestedAction": "Deploy aerial line-truck crew to replace damaged luminaires and inspect junction box wiring.",
+    "estimatedResolution": "24-48 hours"
   },
   {
     "title": "Deep crater-like pothole causing vehicle damage",
@@ -43,7 +64,9 @@
     "aiSource": "gemini",
     "id": "CR-87468",
     "createdAt": "2026-11-21T08:19:22.137Z",
-    "updatedAt": "2026-11-21T08:34:24.012Z"
+    "updatedAt": "2026-11-21T08:34:24.012Z",
+    "suggestedAction": "Deploy road repair crew with cold/hot bituminous asphalt mix to level and patch damaged surface.",
+    "estimatedResolution": "24-48 hours"
   },
   {
     "id": "CR-45129",
@@ -58,7 +81,9 @@
     "aiReasoning": "Critical rating due to direct threat of severe physical injury or fatal falls for young pedestrians walking along this route.",
     "aiSource": "gemini",
     "createdAt": "2026-11-20T08:26:13.141Z",
-    "updatedAt": "2026-11-20T08:26:13.141Z"
+    "updatedAt": "2026-11-20T08:26:13.141Z",
+    "suggestedAction": "Deploy high-pressure jetting and vacuum suction unit to clear clogged sewer conduit.",
+    "estimatedResolution": "12-24 hours"
   },
   {
     "id": "CR-10245",
@@ -73,7 +98,9 @@
     "aiReasoning": "High sanitation and hygiene risk due to animal scavenging and foot-traffic obstruction near homes.",
     "aiSource": "gemini",
     "createdAt": "2026-11-19T08:26:13.141Z",
-    "updatedAt": "2026-11-19T08:26:13.141Z"
+    "updatedAt": "2026-11-19T08:26:13.141Z",
+    "suggestedAction": "Dispatch waste collection compactors to clear accumulated debris and sanitize perimeter.",
+    "estimatedResolution": "24-48 hours"
   },
   {
     "id": "CR-21873",
@@ -88,7 +115,9 @@
     "aiReasoning": "Critical life safety hazard due to electrocution danger in a pedestrian corridor during wet weather.",
     "aiSource": "gemini",
     "createdAt": "2026-11-18T08:26:13.141Z",
-    "updatedAt": "2026-11-20T08:26:13.141Z"
+    "updatedAt": "2026-11-20T08:26:13.141Z",
+    "suggestedAction": "Cordon off danger zone immediately and dispatch rapid-response technical emergency crew.",
+    "estimatedResolution": "12-24 hours"
   },
   {
     "id": "CR-33910",
@@ -103,7 +132,9 @@
     "aiReasoning": "High urgency due to large-scale municipal clean water loss and disruption to local neighborhood water supply.",
     "aiSource": "gemini",
     "createdAt": "2026-11-17T08:26:13.141Z",
-    "updatedAt": "2026-11-19T08:26:13.141Z"
+    "updatedAt": "2026-11-19T08:26:13.141Z",
+    "suggestedAction": "Isolate distribution line valve, excavate break point, and install pipe repair clamp.",
+    "estimatedResolution": "24-48 hours"
   },
   {
     "id": "CR-58204",
@@ -118,7 +149,9 @@
     "aiReasoning": "Medium priority for pedestrian security concerns after sunset in a quiet residential sector.",
     "aiSource": "gemini",
     "createdAt": "2026-11-16T08:26:13.141Z",
-    "updatedAt": "2026-11-18T08:26:13.141Z"
+    "updatedAt": "2026-11-18T08:26:13.141Z",
+    "suggestedAction": "Deploy aerial line-truck crew to replace damaged luminaires and inspect junction box wiring.",
+    "estimatedResolution": "2-3 days"
   },
   {
     "id": "CR-89230",
@@ -133,7 +166,9 @@
     "aiReasoning": "High public health hazard with foul effluent overflowing into a high-footfall metro transit zone.",
     "aiSource": "gemini",
     "createdAt": "2026-11-15T08:26:13.141Z",
-    "updatedAt": "2026-11-20T08:26:13.141Z"
+    "updatedAt": "2026-11-20T08:26:13.141Z",
+    "suggestedAction": "Deploy high-pressure jetting and vacuum suction unit to clear clogged sewer conduit.",
+    "estimatedResolution": "24-48 hours"
   },
   {
     "id": "CR-62941",
@@ -148,7 +183,9 @@
     "aiReasoning": "Road deterioration causing vehicle bumper scrapes and reduced traffic flow during peak hours.",
     "aiSource": "gemini",
     "createdAt": "2026-11-14T08:26:13.141Z",
-    "updatedAt": "2026-11-20T08:26:13.141Z"
+    "updatedAt": "2026-11-20T08:26:13.141Z",
+    "suggestedAction": "Deploy road repair crew with cold/hot bituminous asphalt mix to level and patch damaged surface.",
+    "estimatedResolution": "2-3 days"
   },
   {
     "id": "CR-74815",
@@ -163,6 +200,8 @@
     "aiReasoning": "Low safety urgency; routine road maintenance and cosmetic civic infrastructure upkeep.",
     "aiSource": "gemini",
     "createdAt": "2026-11-13T08:26:13.141Z",
-    "updatedAt": "2026-11-19T08:26:13.141Z"
+    "updatedAt": "2026-11-19T08:26:13.141Z",
+    "suggestedAction": "Conduct on-site inspection and route grievance to the appropriate ward officer.",
+    "estimatedResolution": "3-5 days"
   }
 ]

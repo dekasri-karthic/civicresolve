@@ -68,11 +68,15 @@ export async function POST(req: NextRequest) {
     const prompt = `You are an expert municipal infrastructure inspector analyzing an uploaded civic issue photograph.
 Examine the image carefully and detect the visible civic problem (such as a pothole, road crater, garbage overflow, broken streetlight, water pipe burst, open drain, exposed cable, fallen branch, etc.).
 
+MULTILINGUAL INSTRUCTION:
+The photograph may include street signs, hoardings, milestone markers, vehicle plates, or shop boards written in ANY script or language (such as Tamil, Hindi, Kannada, Telugu, etc.). Regardless of the visible language, you MUST write and return ALL fields (title, description, category) strictly in fluent, standard ENGLISH.
+
 Return strict JSON with these exact fields:
 {
-  "title": "<A clear, professional civic grievance title, e.g. 'Deep asphalt pothole causing traffic obstruction' or 'Uncollected garbage pile overflowing on sidewalk'>",
-  "description": "<A detailed 2-3 sentence description of what is clearly visible in the image, noting surface condition, severity, and potential hazards to pedestrians or motorists>",
+  "title": "<A clear, professional civic grievance title in English, e.g. 'Deep asphalt pothole causing traffic obstruction' or 'Uncollected garbage pile overflowing on sidewalk'>",
+  "description": "<A detailed 2-3 sentence description in English of what is clearly visible in the image, noting surface condition, severity, and potential hazards to pedestrians or motorists>",
   "category": "<One of: 'Road & Potholes', 'Garbage & Sanitation', 'Street Lighting', 'Water Supply & Leakage', 'Drainage & Sewage', 'Public Safety', 'Other'>"
+}
 }
 
 Make the title and description realistic and ready for municipal review.`;

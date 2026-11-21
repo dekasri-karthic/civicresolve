@@ -18,6 +18,8 @@ const SAMPLE_COMPLAINTS: Complaint[] = [
     aiSummary: "Major uncollected waste heap blocking sidewalk near residential apartments.",
     aiReasoning:
       "High sanitation and hygiene risk due to animal scavenging and foot-traffic obstruction near homes.",
+    suggestedAction: "Dispatch waste collection compactors to clear accumulated debris and sanitize perimeter.",
+    estimatedResolution: "24-48 hours",
     aiSource: "gemini",
     createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
@@ -35,6 +37,8 @@ const SAMPLE_COMPLAINTS: Complaint[] = [
     aiSummary: "Exposed live electrical wiring sparking near high-traffic commuter bus shelter.",
     aiReasoning:
       "Critical life safety hazard due to electrocution danger in a pedestrian corridor during wet weather.",
+    suggestedAction: "Cordon off danger zone immediately and dispatch rapid-response technical emergency crew.",
+    estimatedResolution: "12-24 hours",
     aiSource: "gemini",
     createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
@@ -52,6 +56,8 @@ const SAMPLE_COMPLAINTS: Complaint[] = [
     aiSummary: "Ruptured 6-inch freshwater supply line flooding street and wasting drinking water.",
     aiReasoning:
       "High urgency due to large-scale municipal clean water loss and disruption to local neighborhood water supply.",
+    suggestedAction: "Isolate distribution line valve, excavate break point, and install pipe repair clamp.",
+    estimatedResolution: "24-48 hours",
     aiSource: "gemini",
     createdAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
@@ -69,6 +75,8 @@ const SAMPLE_COMPLAINTS: Complaint[] = [
     aiSummary: "Uncovered deep storm drain trench poses immediate fall hazard to schoolchildren.",
     aiReasoning:
       "Critical rating due to direct threat of severe physical injury or fatal falls for young pedestrians walking along this route.",
+    suggestedAction: "Deploy high-pressure jetting and vacuum suction unit to clear clogged sewer conduit and fit new safety slab.",
+    estimatedResolution: "12-24 hours",
     aiSource: "gemini",
     createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
@@ -86,6 +94,8 @@ const SAMPLE_COMPLAINTS: Complaint[] = [
     aiSummary: "Four consecutive non-functional streetlights causing dark stretch of 200 meters.",
     aiReasoning:
       "Medium priority for pedestrian security concerns after sunset in a quiet residential sector.",
+    suggestedAction: "Deploy aerial line-truck crew to replace damaged luminaires and inspect junction box wiring.",
+    estimatedResolution: "2-3 days",
     aiSource: "gemini",
     createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
@@ -103,6 +113,8 @@ const SAMPLE_COMPLAINTS: Complaint[] = [
     aiSummary: "Cluster of asphalt potholes patched and resurfaced with bitumen mix.",
     aiReasoning:
       "Road deterioration causing vehicle bumper scrapes and reduced traffic flow during peak hours.",
+    suggestedAction: "Deploy asphalt road repair gang with cold bituminous mix to level and patch damaged surface.",
+    estimatedResolution: "2-3 days",
     aiSource: "gemini",
     createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
@@ -120,6 +132,8 @@ const SAMPLE_COMPLAINTS: Complaint[] = [
     aiSummary: "Repainting of weathered pedestrian crossing lines and straightened directional signage.",
     aiReasoning:
       "Low safety urgency; routine road maintenance and cosmetic civic infrastructure upkeep.",
+    suggestedAction: "Conduct on-site inspection, repaint crossing lines, and remount directional signage.",
+    estimatedResolution: "3-5 days",
     aiSource: "gemini",
     createdAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
@@ -137,6 +151,8 @@ const SAMPLE_COMPLAINTS: Complaint[] = [
     aiSummary: "Sanitary sewer overflow jet-cleaned and cleared by municipal suction truck.",
     aiReasoning:
       "High public health hazard with foul effluent overflowing into a high-footfall metro transit zone.",
+    suggestedAction: "Deploy high-pressure jetting and vacuum suction unit to clear clogged sewer conduit.",
+    estimatedResolution: "24-48 hours",
     aiSource: "gemini",
     createdAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
@@ -156,6 +172,36 @@ async function seed() {
       }
     } catch {
       existing = [];
+    }
+
+    // Ensure all existing complaints also have suggestedAction and estimatedResolution
+    for (const c of existing) {
+      if (!c.suggestedAction) {
+        c.suggestedAction =
+          c.category === "Road & Potholes"
+            ? "Deploy road repair crew with cold/hot bituminous asphalt mix to level and patch damaged surface."
+            : c.category === "Garbage & Sanitation"
+            ? "Dispatch waste collection compactors to clear accumulated debris and sanitize perimeter."
+            : c.category === "Street Lighting"
+            ? "Deploy aerial line-truck crew to replace damaged luminaires and inspect junction box wiring."
+            : c.category === "Water Supply & Leakage"
+            ? "Isolate distribution line valve, excavate break point, and install pipe repair clamp."
+            : c.category === "Drainage & Sewage"
+            ? "Deploy high-pressure jetting and vacuum suction unit to clear clogged sewer conduit."
+            : c.category === "Public Safety"
+            ? "Cordon off danger zone immediately and dispatch rapid-response technical emergency crew."
+            : "Conduct on-site inspection and route grievance to the appropriate ward officer.";
+      }
+      if (!c.estimatedResolution) {
+        c.estimatedResolution =
+          c.priority === "Critical"
+            ? "12-24 hours"
+            : c.priority === "High"
+            ? "24-48 hours"
+            : c.priority === "Medium"
+            ? "2-3 days"
+            : "3-5 days";
+      }
     }
 
     const existingIds = new Set(existing.map((c) => c.id));

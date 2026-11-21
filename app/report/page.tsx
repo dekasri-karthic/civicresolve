@@ -9,6 +9,7 @@ import {
   Building2,
   Camera,
   CheckCircle2,
+  Clock,
   Image as ImageIcon,
   Info,
   Loader2,
@@ -16,6 +17,7 @@ import {
   RefreshCw,
   Sparkles,
   UploadCloud,
+  Wrench,
   X,
   FileText,
 } from "lucide-react";
@@ -205,6 +207,12 @@ export default function ReportPage() {
       formData.append("department", finalDepartment || aiResult.department);
       formData.append("aiSummary", aiResult.summary);
       formData.append("aiReasoning", aiResult.reasoning);
+      if (aiResult.suggestedAction) {
+        formData.append("suggestedAction", aiResult.suggestedAction);
+      }
+      if (aiResult.estimatedResolution) {
+        formData.append("estimatedResolution", aiResult.estimatedResolution);
+      }
       formData.append("aiSource", aiResult.source);
 
       if (imageFile) {
@@ -558,6 +566,32 @@ export default function ReportPage() {
               <p className="text-sm text-slate-600 leading-relaxed bg-teal-50/40 p-3 rounded-lg border border-teal-100">
                 {aiResult.reasoning}
               </p>
+            </div>
+
+            {/* Suggested Action & Estimated Resolution */}
+            <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200">
+                <p className="text-[11px] uppercase tracking-wider font-bold text-amber-800 mb-1 flex items-center gap-1.5">
+                  <Wrench className="w-3.5 h-3.5 text-amber-700" />
+                  <span>Suggested Departmental Action</span>
+                </p>
+                <p className="text-xs sm:text-sm font-medium text-amber-950 leading-relaxed">
+                  {aiResult.suggestedAction || "Deploy municipal inspection crew to remediate issue."}
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-cyan-50/70 border border-cyan-200">
+                <p className="text-[11px] uppercase tracking-wider font-bold text-cyan-800 mb-1 flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-cyan-700" />
+                  <span>Estimated Resolution SLA</span>
+                </p>
+                <p className="text-xs sm:text-sm font-bold text-cyan-950">
+                  {aiResult.estimatedResolution || "2-3 days"}
+                </p>
+                <p className="text-[10px] text-cyan-700/80 mt-0.5">
+                  Targeted municipal completion timeframe
+                </p>
+              </div>
             </div>
 
             {/* Editable Controls */}

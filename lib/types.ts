@@ -29,6 +29,8 @@ export interface ClassificationResult {
   department: string;
   summary: string;
   reasoning: string;
+  suggestedAction: string;
+  estimatedResolution: string;
   source: "gemini" | "fallback";
 }
 
@@ -44,6 +46,8 @@ export interface Complaint {
   imageUrl?: string;
   aiSummary: string;
   aiReasoning: string;
+  suggestedAction?: string;
+  estimatedResolution?: string;
   aiSource: "gemini" | "fallback";
   createdAt: string;
   updatedAt: string;

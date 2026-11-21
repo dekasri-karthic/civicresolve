@@ -31,6 +31,8 @@ export async function POST(req: NextRequest) {
     let department = "General Grievance Cell";
     let aiSummary = "";
     let aiReasoning = "";
+    let suggestedAction = "";
+    let estimatedResolution = "";
     let aiSource: "gemini" | "fallback" = "fallback";
     let imageUrl: string | undefined = undefined;
 
@@ -44,6 +46,8 @@ export async function POST(req: NextRequest) {
       department = (formData.get("department") as string) || "General Grievance Cell";
       aiSummary = (formData.get("aiSummary") as string) || title;
       aiReasoning = (formData.get("aiReasoning") as string) || "";
+      suggestedAction = (formData.get("suggestedAction") as string) || "";
+      estimatedResolution = (formData.get("estimatedResolution") as string) || "";
       aiSource = ((formData.get("aiSource") as string) || "fallback") as
         | "gemini"
         | "fallback";
@@ -95,6 +99,8 @@ export async function POST(req: NextRequest) {
       department = body.department || "General Grievance Cell";
       aiSummary = body.aiSummary || title;
       aiReasoning = body.aiReasoning || "";
+      suggestedAction = body.suggestedAction || "";
+      estimatedResolution = body.estimatedResolution || "";
       aiSource = (body.aiSource || "fallback") as "gemini" | "fallback";
       imageUrl = body.imageUrl;
     }
@@ -117,6 +123,8 @@ export async function POST(req: NextRequest) {
       imageUrl,
       aiSummary,
       aiReasoning,
+      suggestedAction: suggestedAction || undefined,
+      estimatedResolution: estimatedResolution || undefined,
       aiSource,
     });
 
