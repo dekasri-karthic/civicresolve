@@ -23,8 +23,8 @@ export default function RootLayout({
             <p>
               <strong className="text-teal-700">CivicResolve</strong> — Report. Track. Resolve.
             </p>
-            <p className="text-xs text-slate-400">
-              Built with Next.js & Google Gemini for Hackathon Demo
+            <p className="text-xs text-slate-500 font-medium">
+              Built by Dekasri Karthic
             </p>
           </div>
         </footer>
