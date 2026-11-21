@@ -6,14 +6,14 @@
     "category": "Road & Potholes",
     "priority": "Critical",
     "department": "Public Works & Road Maintenance Division",
-    "status": "Reported",
+    "status": "In Progress",
     "imageUrl": "/uploads/1795250735384-59zvwn.jpg",
     "aiSummary": "Road & Potholes issue reported at 100 Feet Road, Indiranagar, Bengaluru: Severe asphalt pothole with standing water and surface cracking",
     "aiReasoning": "Keyword-based triage identified keywords related to Road & Potholes. Assigned Critical priority based on safety and situational risk indicators.",
     "aiSource": "fallback",
     "id": "CR-49337",
     "createdAt": "2026-11-21T08:45:35.394Z",
-    "updatedAt": "2026-11-21T08:45:35.394Z"
+    "updatedAt": "2026-11-21T08:51:32.336Z"
   },
   {
     "title": "Streetlights not working near school",

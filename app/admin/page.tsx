@@ -9,6 +9,7 @@ import {
   Check,
   CheckCircle2,
   Clock,
+  ExternalLink,
   Filter,
   Hourglass,
   Layers,
@@ -135,7 +136,11 @@ export default function AdminPage() {
       reported: complaints.filter((c) => c.status === "Reported").length,
       inProgress: complaints.filter((c) => c.status === "In Progress").length,
       resolved: complaints.filter((c) => c.status === "Resolved").length,
-      critical: complaints.filter((c) => c.priority === "Critical" && c.status !== "Resolved").length,
+      criticalHigh: complaints.filter(
+        (c) =>
+          (c.priority === "Critical" || c.priority === "High") &&
+          c.status !== "Resolved"
+      ).length,
     };
   }, [complaints]);
 
@@ -265,15 +270,15 @@ export default function AdminPage() {
           <p className="text-2xl font-bold text-emerald-900 mt-1">{stats.resolved}</p>
         </div>
 
-        {/* Critical Alerts */}
-        <div className="col-span-2 sm:col-span-1 bg-red-50 p-4 rounded-xl border border-red-200 shadow-xs">
+        {/* Critical & High Priority */}
+        <div className="col-span-2 sm:col-span-1 bg-red-50/80 p-4 rounded-xl border border-red-200 shadow-xs">
           <div className="flex items-center justify-between">
             <p className="text-xs font-semibold text-red-800 uppercase tracking-wider">
-              Active Critical
+              Critical / High
             </p>
             <ShieldAlert className="w-4 h-4 text-red-600 animate-pulse" />
           </div>
-          <p className="text-2xl font-bold text-red-900 mt-1">{stats.critical}</p>
+          <p className="text-2xl font-bold text-red-900 mt-1">{stats.criticalHigh}</p>
         </div>
       </div>
 
@@ -401,9 +406,19 @@ export default function AdminPage() {
                         <div className="font-semibold text-slate-900 group-hover:text-teal-900 line-clamp-1">
                           {item.title}
                         </div>
-                        <div className="text-[11px] text-slate-500 flex items-center gap-1 mt-0.5">
+                        <div className="text-[11px] text-slate-500 flex items-center gap-1.5 mt-0.5 flex-wrap">
                           <MapPin className="w-3 h-3 text-teal-600 shrink-0" />
-                          <span className="truncate">{item.location}</span>
+                          <span className="truncate max-w-[220px]">{item.location}</span>
+                          <a
+                            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.location)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-0.5 text-teal-600 hover:text-teal-800 hover:underline font-semibold text-[10px] bg-teal-50 px-1.5 py-0.5 rounded-sm border border-teal-200 shrink-0"
+                            title="Open location in Google Maps"
+                          >
+                            <span>Open in Maps</span>
+                            <ExternalLink className="w-2.5 h-2.5" />
+                          </a>
                         </div>
                       </td>
 

@@ -8,6 +8,7 @@ import {
   Calendar,
   ChevronDown,
   ChevronUp,
+  ExternalLink,
   Filter,
   Image as ImageIcon,
   Loader2,
@@ -323,9 +324,19 @@ export default function TrackPage() {
 
                     {/* Metadata tags: Location, Category, Department */}
                     <div className="flex flex-wrap items-center gap-y-1.5 gap-x-4 text-xs text-slate-600 pt-1">
-                      <span className="inline-flex items-center gap-1 text-slate-700 font-medium">
+                      <span className="inline-flex items-center gap-1.5 text-slate-700 font-medium flex-wrap">
                         <MapPin className="w-3.5 h-3.5 text-teal-600 shrink-0" />
                         <span>{item.location}</span>
+                        <a
+                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.location)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-teal-600 hover:text-teal-800 hover:underline font-semibold text-[11px] bg-teal-50 px-2 py-0.5 rounded-md border border-teal-200"
+                          title="Open location in Google Maps"
+                        >
+                          <span>Open in Maps</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
                       </span>
 
                       <span className="inline-flex items-center gap-1 text-slate-500">
